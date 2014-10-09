@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import static org.springframework.hateoas.TemplateVariable.VariableType.*;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -54,9 +56,9 @@ public final class TemplateVariable implements Serializable {
 	 */
 	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
 
-		Assert.hasText("Variable name must not be null or empty!");
-		Assert.notNull("Variable type must not be null!");
-		Assert.notNull("Description must not be null!");
+		Assert.hasText(name, "Variable name must not be null or empty!");
+		Assert.notNull(type, "Variable type must not be null!");
+		Assert.notNull(description, "Description must not be null!");
 
 		this.name = name;
 		this.type = type;
@@ -117,6 +119,35 @@ public final class TemplateVariable implements Serializable {
 	 */
 	boolean isCombinable(TemplateVariable variable) {
 		return this.type.canBeCombinedWith(variable.type);
+	}
+
+	/**
+	 * Returns whether the given {@link TemplateVariable} is logically equivalent to the given one. This considers request
+	 * parameter variables equivalent independently from whether they're continued or not.
+	 * 
+	 * @param variable
+	 * @return
+	 */
+	boolean isEquivalent(TemplateVariable variable) {
+		return this.name.equals(variable.name) && isCombinable(variable);
+	}
+
+	/**
+	 * Returns whether the current {@link TemplateVariable} is representing a request parameter.
+	 * 
+	 * @return
+	 */
+	boolean isRequestParameterVariable() {
+		return type.equals(REQUEST_PARAM) || type.equals(REQUEST_PARAM_CONTINUED);
+	}
+
+	/**
+	 * Returns whether the variable is a fragement one.
+	 * 
+	 * @return
+	 */
+	boolean isFragment() {
+		return type.equals(FRAGMENT);
 	}
 
 	/* 
